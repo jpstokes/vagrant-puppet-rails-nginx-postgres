@@ -19,6 +19,11 @@ user{ "meandev":
 
 # first create a standard location for deploying our MEAN applications to
 file { "/usr/local/src/mean":
+	ensure => "link",
+	target => '/vagrant',
+}
+
+file { "/vagrant":
 	ensure => "directory",
 	mode => '0664',
 	owner => "meandev",

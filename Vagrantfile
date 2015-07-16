@@ -45,7 +45,7 @@ Vagrant::Config.run do |config|
 			appserver_puppet.manifest_file  = "appserver.pp"
 		end
 
-		# define the name of your application here within the args e.g replace "mytestapp" with your app name
-		appserver.vm.provision :shell, :path => "shell/kickstart-app.sh",:args => "mytestapp"
+		# define the name of your application here within the args e.g replace "app" with your app name
+		appserver.vm.provision :shell, :path => "shell/kickstart-app.sh",:args => "app"
 	end
 end
