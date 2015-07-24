@@ -7,6 +7,8 @@ class { 'nginx':
 
 class { 'rbenv': }
 
+class { 'firewall': }
+
 package { ['libxml2', 'libxml2-dev', 'libxslt1-dev']:
   ensure => installed
 }
@@ -29,12 +31,6 @@ file { "/app":
 file { "/vagrant/app":
 	ensure => "directory",
 	mode => '0755',
-}
-
-firewall { '100 allow http, https and ssh access':
-    port   => [80, 443, 22],
-    proto  => tcp,
-    action => accept
 }
 
 nginx::resource::vhost { 'localhost':
