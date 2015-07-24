@@ -27,6 +27,8 @@ if [ "$FOUND_GIT" -ne '0' ]; then
     apt-get -q -y update
     apt-get -q -y install build-essential
     apt-get -q -y install git
+    apt-get -q -y install libqtwebkit-dev
+    apt-get -q -y install xvfb
     git config --global url."https://".insteadOf git://
     echo 'git installed.'
   else

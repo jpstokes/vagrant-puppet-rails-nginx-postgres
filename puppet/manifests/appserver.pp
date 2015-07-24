@@ -1,79 +1,51 @@
-
-# installs required dependent packages then
-# gets nodejs and npm package from puppet forge
-# after nodejs is installed will then install npm modules required for MEAN Stack
-
-group{ "meandev":
-	ensure => present,
-	gid => 665
+class { 'nginx':
+  package_source  => 'passenger',
+  http_cfg_append => {
+    'passenger_root' => '/usr/lib/ruby/vendor_ruby/phusion_passenger/locations.ini',
+  }
 }
 
-user{ "meandev":	
-	ensure => present,
-	gid => "meandev",
-	groups => ["adm"],
-	membership => minimum,
-	shell => "/bin/bash",
-	require => Group["meandev"]
+class { 'rbenv': }
+
+package { ['libxml2', 'libxml2-dev', 'libxslt1-dev']:
+  ensure => installed
 }
 
-# first create a standard location for deploying our MEAN applications to
-file { "/usr/local/src/mean":
+package { 'nodejs':
+  ensure => installed
+}
+
+exec { 'run bundler':
+  command => "bundle install",
+  require => Class['qt']
+}
+
+file { "/app":
 	ensure => "link",
-	target => '/vagrant',
+	target => '/vagrant/app',
+  require => File['/vagrant/app']
 }
 
-file { "/vagrant":
+file { "/vagrant/app":
 	ensure => "directory",
-	mode => '0664',
-	owner => "meandev",
-	group => "meandev",
-	require => User["meandev"]
+	mode => '0755',
 }
 
-#install nodejs and npm	
-class { 'nodejs':
-	version => 'v0.10.26'
+firewall { '100 allow http, https and ssh access':
+    port   => [80, 443, 22],
+    proto  => tcp,
+    action => accept
 }
 
-
-##Install the required node modules using NPM
-
-# install express
-package { 'express-generator':
-  ensure   => present,
-  provider => 'npm',
+nginx::resource::vhost { 'localhost':
+  ensure                => present,
+  listen_port           => 80,
+  www_root              => '/vagrant/app',
+  vhost_cfg_append => {
+    'passenger_enabled' => 'on',
+    'passenger_ruby'    => '/usr/bin/ruby',
+  }
 }
 
-# install jade
-package { 'jade':
-  ensure   => present,
-  provider => 'npm',
-}
-
-# install mongoose
-package { 'mongoose':
-  ensure   => present,
-  provider => 'npm',
-}
-
-# install bower
-package { 'bower':
-  ensure   => present,
-  provider => 'npm',
-}
-
-# install jasmine for testing
-package { 'jasmine-node':
-  ensure   => present,
-  provider => 'npm',
-}
-
-# install nodeunit for testing
-package { 'nodeunit':
-  ensure   => present,
-  provider => 'npm',
-}
-
-
-
+rbenv::plugin { 'sstephenson/ruby-build': }
+rbenv::build { '2.2.2': global => true }
